@@ -5,7 +5,7 @@
 /* Controllers */
 var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
 
-    .controller('MainController', function (NgTableParams,iRoadModal, $scope,$uibModal,$log) {
+    .controller('MainController', function (NgTableParams,iRoadModal, $scope,$uibModal,$log,toaster) {
         $scope.loading = true;
         $scope.tableParams = new NgTableParams();
         $scope.params ={pageSize:5};
@@ -41,6 +41,11 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
             return cols;
         }
 
+
+        /**
+         * getDrivers
+         */
+        getDrivers();
         function getDrivers(){
             iRoadModal.getAll($scope.programName,$scope.params).then(function(results){
                 $scope.tableParams.settings({
@@ -55,7 +60,12 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
             })
         }
 
-        getDrivers();
+
+        $scope.showOnProgressLink = function(title){
+            toaster.pop('info', title, "On  progress");
+        };
+
+
         $scope.showDetails = function(event){
             var modalInstance = $uibModal.open({
                 animation: $scope.animationsEnabled,
@@ -102,7 +112,8 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
             }, function () {
                 $log.info('Modal dismissed at: ' + new Date());
             });
-        }
+        };
+
         $scope.showAddNew = function(){
             var event = {};
             var modalInstance = $uibModal.open({
@@ -134,9 +145,8 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
         iRoadModal.getRelations(event).then(function(newEvent){
             $scope.event = newEvent;
             $scope.loading = false;
-        })
+        });
         $scope.program = program;
-        console.log(program.programStages[0].programStageDataElements);
         $scope.ok = function () {
             $uibModalInstance.close({});
         };
@@ -149,7 +159,7 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
         iRoadModal.getRelations(event).then(function(newEvent){
             $scope.event = newEvent;
             $scope.loading = false;
-        })
+        });
         $scope.program = program;
         $scope.getDataElementIndex = function(dataElement){
             var index = "";
@@ -157,37 +167,25 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                 if(dataValue.dataElement == dataElement.id){
                     index = i;
                 }
-            })
+            });
             return index;
-        }
+        };
         $scope.save = function () {
             iRoadModal.setRelations(event).then(function(newEvent){
                 DHIS2EventFactory.update(newEvent).then(function(results){
                     console.log(results);
                     $scope.loading = false;
-                    toaster.pop('success', result.response.status, result.message);
+                    toaster.pop('success', results.response.status, results.message);
                     $uibModalInstance.close($scope.item);
                 },function(error){
                     $scope.loading = false;
                     console.log(error);
                     toaster.pop('error', error.status, error.statusText);
                 })
-            })
-            /*
-            $scope.loading = true;
-            iRoadModal.save("Offence Event",$scope.item).then(function(results){
-                console.log(results);
-                $scope.loading = false;
-                toaster.pop('success', result.response.status, result.message);
-                $uibModalInstance.close($scope.item);
-            },function(error){
-                $scope.loading = false;
-                console.log(error);
-                toaster.pop('error', error.status, error.statusText);
-            });*/
+            });
         };
 
         $scope.cancel = function () {
             $uibModalInstance.dismiss('cancel');
         };
-    })
+    });
