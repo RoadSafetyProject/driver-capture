@@ -61,11 +61,6 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
         }
 
 
-        $scope.showOnProgressLink = function(title){
-            toaster.pop('info', title, "On  progress");
-        };
-
-
         $scope.showDetails = function(event){
             var modalInstance = $uibModal.open({
                 animation: $scope.animationsEnabled,
@@ -139,6 +134,10 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                 $log.info('Modal dismissed at: ' + new Date());
             });
         }
+
+        $scope.showOnProgressLink = function(title){
+            toaster.pop('info', title, "On  progress");
+        };
     })
     .controller('DetailController', function (iRoadModal, $scope,$uibModalInstance,program,event) {
         $scope.loading = true;
@@ -170,18 +169,18 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
             });
             return index;
         };
+
+        /**
+         * save
+         */
         $scope.save = function () {
-            iRoadModal.setRelations(event).then(function(newEvent){
-                DHIS2EventFactory.update(newEvent).then(function(results){
-                    console.log(results);
-                    $scope.loading = false;
-                    toaster.pop('success', results.response.status, results.message);
-                    $uibModalInstance.close($scope.item);
-                },function(error){
-                    $scope.loading = false;
-                    console.log(error);
-                    toaster.pop('error', error.status, error.statusText);
-                })
+            $scope.loading = true;
+            iRoadModal.save($scope.event,$scope.program).then(function(result){
+                $scope.loading = false;
+                $uibModalInstance.close(result);
+            },function(error){
+                $scope.loading = false;
+                console.log(error);
             });
         };
 
