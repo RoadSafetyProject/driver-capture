@@ -145,7 +145,49 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
             }, function () {
 
             });
-        }
+        };
+
+        $scope.addRelationData = function(relationName,event){
+            iRoadModal.getProgramByName(relationName).then(function(program){
+                program.displayName = $scope.program.displayName + " - " + relationName;
+                iRoadModal.getRelationshipDataElementByProgram(iRoadModal.refferencePrefix + $scope.programName,program).then(function(dataElement){
+                    var relationEvent = {};
+                    iRoadModal.initiateEvent(relationEvent,program).then(function(newEvent){
+                        newEvent.dataValues.forEach(function(dataValue){
+                            if(dataValue.dataElement == dataElement.id){
+                                dataValue.value = event.event;
+                            }
+                        });
+                        var modalInstance = $uibModal.open({
+                            animation: $scope.animationsEnabled,
+                            templateUrl: 'views/addedit.html',
+                            controller: 'EditController',
+                            size: "lg",
+                            resolve: {
+                                event: function () {
+                                    return newEvent;
+                                },
+                                program:function(){
+                                    return program;
+                                }
+                            }
+                        });
+                        modalInstance.result.then(function (resultEvent) {
+                            console.log(resultEvent);
+                        }, function () {
+                            $log.info('Relation Modal dismissed at: ' + new Date());
+                        });
+                    });
+                });
+            });
+        };
+
+        $scope.viewRelationData = function(relationName,eventId){
+            console.log(relationName);
+            console.log(eventId);
+        };
+
+
     })
     .controller('DetailController', function (iRoadModal, $scope,$uibModalInstance,program,event) {
         $scope.loading = true;
