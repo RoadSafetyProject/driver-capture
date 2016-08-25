@@ -7,6 +7,9 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
 
     .controller('MainController', function (NgTableParams,iRoadModal, $scope,$uibModal,$log,toaster) {
         //$scope.offenceEvent = iRoadModal("Offence Event");
+        /*iRoadModal.find($scope.programName).then(function(events){
+            console.log("events:",events);
+        })*/
         $scope.loading = true;
         $scope.tableParams = new NgTableParams();
 
@@ -42,8 +45,6 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
             });
             return cols;
         }
-
-
         /**
          * getDrivers
          */
@@ -204,7 +205,8 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
             $uibModalInstance.dismiss('cancel');
         };
     })
-    .controller('EditController', function (NgTableParams,iRoadModal, $scope,$uibModalInstance,program,event,toaster,DHIS2EventFactory) {
+    .controller('EditController', function (NgTableParams,iRoadModal, $scope,$uibModalInstance,program,event,$uibModal) {
+        $scope.program = program;
         iRoadModal.initiateEvent(event,program).then(function(newEvent){
             $scope.event = newEvent;
             $scope.loading = false;
@@ -218,10 +220,9 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                 return index;
             }
         })
-        $scope.program = program;
-
         $scope.save = function () {
             $scope.loading = true;
+            console.log($scope.event);
             iRoadModal.save($scope.event,$scope.program).then(function(result){
                 $scope.loading = false;
                 $uibModalInstance.close(result);
