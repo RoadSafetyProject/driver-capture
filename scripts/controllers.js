@@ -88,7 +88,8 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                 });
                 $log.info('Modal dismissed at: ' + new Date());
             });
-        }
+        };
+
         $scope.showEdit = function(event){
             var modalInstance = $uibModal.open({
                 animation: $scope.animationsEnabled,
@@ -113,7 +114,7 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                         })
 
                     }
-                })
+                });
                 $scope.tableParams.reload();
             }, function () {
                 iRoadModal.setRelations(event).then(function(){
@@ -121,7 +122,8 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                 });
                 $log.info('Modal dismissed at: ' + new Date());
             });
-        }
+        };
+
         $scope.showAddNew = function(){
             var event = {};
             var modalInstance = $uibModal.open({
@@ -181,23 +183,95 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
             });
         };
 
-        $scope.viewRelationData = function(relationName,eventId){
-            console.log(relationName);
-            console.log(eventId);
-            toaster.pop('success','View for ' + relationName + ' on progress');
+        $scope.viewRelationData = function(relationName,event){
+            iRoadModal.getProgramByName(relationName).then(function(program){
+                iRoadModal.getRelationshipDataElementByProgram(iRoadModal.refferencePrefix + $scope.programName,program).then(function(dataElement){
+                    iRoadModal.find(program.id,dataElement.id,event.event).then(function(events){
+                        var modalInstance = $uibModal.open({
+                            animation: $scope.animationsEnabled,
+                            templateUrl: 'views/viewRelation.html',
+                            controller: 'viewRelationController',
+                            size: "lg",
+                            resolve: {
+                                events: function () {
+                                    return events;
+                                },
+                                program:function(){
+                                    return program;
+                                }
+                            }
+                        });
+                        modalInstance.result.then(function (resultEvent) {
+                            console.log(resultEvent);
+                        }, function () {
+                            $log.info('Relation Modal dismissed at: ' + new Date());
+                        });
+                    });
+                });
+            });
         };
 
+    })
+    .controller('viewRelationController', function (iRoadModal,NgTableParams,$scope,$uibModalInstance,program,events) {
+        $scope.loading = true;
+        $scope.events = [];
+        $scope.tableParams = new NgTableParams();
 
+        $scope.tableCols = createColumns(program.programStages[0].programStageDataElements);
+        events.forEach(function(event){
+            iRoadModal.getRelations(event).then(function(newEvent){
+                $scope.events.push(newEvent);
+                if(events.length == $scope.events.length){
+                    $scope.tableParams.settings({
+                        dataset: events
+                    });
+                    $scope.loading = false;
+                }
+            });
+        });
+
+        /**
+         * createColumns
+         * @param programStageDataElements
+         * @returns {Array}
+         */
+        function createColumns(programStageDataElements) {
+            var cols = [];
+            if (programStageDataElements){
+                programStageDataElements.forEach(function (programStageDataElement) {
+                    var filter = {};
+                    filter[programStageDataElement.dataElement.name.replace(" ","")] = 'text';
+                    cols.push({
+                        field: programStageDataElement.dataElement.name.replace(" ",""),
+                        title: programStageDataElement.dataElement.name,
+                        headerTitle: programStageDataElement.dataElement.name,
+                        show: programStageDataElement.displayInReports,
+                        sortable: programStageDataElement.dataElement.name.replace(" ",""),
+                        filter: filter
+                    });
+                })
+            }
+            return cols;
+        }
+
+        $scope.program = program;
+        $scope.ok = function () {
+            $uibModalInstance.close();
+        };
+
+        $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+        };
     })
     .controller('DetailController', function (iRoadModal, $scope,$uibModalInstance,program,event) {
         $scope.loading = true;
         iRoadModal.getRelations(event).then(function(newEvent){
             $scope.event = newEvent;
             $scope.loading = false;
-        })
+        });
         $scope.program = program;
         $scope.ok = function () {
-            $uibModalInstance.close({});
+            $uibModalInstance.close(event);
         };
 
         $scope.cancel = function () {
@@ -214,10 +288,11 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                     if(dataValue.dataElement == dataElement.id){
                         index = i;
                     }
-                })
+                });
                 return index;
             }
-        })
+        });
+
         $scope.program = program;
 
         $scope.save = function () {
@@ -235,4 +310,4 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                 $uibModalInstance.dismiss('cancel');
             })
         };
-    })
+    });
