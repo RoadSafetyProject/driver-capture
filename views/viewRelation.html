@@ -8,6 +8,10 @@
                 {{event | extrapolateDataValue:col.title()}}
             </td>
         </tr>
+
+    </table>
+    <table class="table" ng-if="loading">
+        <tr ><td colspan="100%" align="center"><div class="loader"></div></td></tr>
     </table>
 </div>
 <div class="modal-footer">
