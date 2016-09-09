@@ -15,6 +15,7 @@ var app = angular.module('app',
                      'd2Controllers',
                      'pascalprecht.translate',
                      'd2HeaderBar','ngTable','toaster','eventCaptureServices','ui-leaflet','camera'])
+              
 .value('DHIS2URL', '/dhis2/')
 
 .config(function($translateProvider,$routeProvider) {
