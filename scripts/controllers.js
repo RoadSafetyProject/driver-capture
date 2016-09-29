@@ -9,7 +9,6 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
 
 
         $scope.loading = true;
-        $scope.tableParams = new NgTableParams();
         $scope.pager ={pageSize:10};
         $scope.programName = "Driver";
 
@@ -18,43 +17,21 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
          * @param programStageDataElements
          * @returns {Array}
          */
-        function createColumns(programStageDataElements) {
-            var cols = [];
-            if (programStageDataElements){
-                programStageDataElements.forEach(function (programStageDataElement) {
-                    var filter = {};
-                    filter[programStageDataElement.dataElement.name.replace(" ","")] = 'text';
-                    cols.push({
-                        field: programStageDataElement.dataElement.name.replace(" ",""),
-                        title: programStageDataElement.dataElement.name,
-                        headerTitle: programStageDataElement.dataElement.name,
-                        show: programStageDataElement.displayInReports,
-                        sortable: programStageDataElement.dataElement.name.replace(" ",""),
-                        filter: filter
-                    });
-                })
-            }
-            cols.push({
-                field: "",
-                title: "Action",
-                headerTitle: "Action",
-                show: true
-            });
-            return cols;
-        }
-
 
         /**
          * getDrivers
          */
-        dhis2.loadData = function(){
+        $scope.getDriver = function(){
+            $scope.loading = true;
             $scope.tableParams = new NgTableParams({count:$scope.pager.pageSize}, {
                 getData: function(params) {
                     $scope.pager.page = params.page();
                     // ajax request to api
                     return iRoadModal.getProgramByName($scope.programName).then(function(program){
                         $scope.program = program;
+                        $scope.tableCols = iRoadModal.createColumns(program.programStages[0].programStageDataElements);
                         return iRoadModal.getAll($scope.programName,$scope.pager).then(function(results){
+                            console.log(results)
                             $scope.pager = results.pager;
                             params.page($scope.pager.page)
                             params.total($scope.pager.total);
@@ -66,7 +43,11 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                     })
                 }
             });
+        }
+        dhis2.loadData = function(){
+            $scope.getDriver();
         };
+        $scope.getDriver();
 
         /**
          * showDetails
