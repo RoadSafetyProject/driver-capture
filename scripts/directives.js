@@ -295,16 +295,23 @@ var appDirectives = angular.module('appDirectives', [])
                 $scope.getFile = function () {
                     $scope.progress = 0;
                     console.log($scope.file);
-                    FileService.upload($scope.file).then(function(response){
-                        alert("Should Be first");
-                        console.log(response);
+                    iRoadModal.uploadFile($scope.file).then(function(response){
+                        $scope.ngModel.value = response.response.fileResource.id;
                     })
                     FileReader.readAsDataUrl($scope.file, $scope)
                         .then(function(result) {
                             $scope.imageSrc = result;
                         });
                 };
-
+                $scope.upload = function(file){
+                    var formData = new FormData();
+                    formData.append('file', file);
+                    var headers = {transformRequest: angular.identity, headers: {'Content-Type': undefined}};
+                    var promise = $http.post('../api/fileResources', formData, headers).then(function(response){
+                        return response.data;
+                    });
+                    return promise;
+                }
                 $scope.$on("fileProgress", function(e, progress) {
                     $scope.progress = progress.loaded / progress.total;
                 });

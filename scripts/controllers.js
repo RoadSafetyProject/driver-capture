@@ -31,7 +31,6 @@ var appControllers = angular.module('appControllers', ['iroad-relation-modal'])
                         $scope.program = program;
                         $scope.tableCols = iRoadModal.createColumns(program.programStages[0].programStageDataElements);
                         return iRoadModal.getAll($scope.programName,$scope.pager).then(function(results){
-                            console.log(results)
                             $scope.pager = results.pager;
                             params.page($scope.pager.page)
                             params.total($scope.pager.total);

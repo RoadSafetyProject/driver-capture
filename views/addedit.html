@@ -9,7 +9,7 @@
                 <td>
                     <div ng-if="(programStageDataElement.dataElement.valueType == 'FILE_RESOURCE')"
                          class="form-group">
-                        <file-select ng-model="ngModel.value" event="event" dhis-data-element="programStageDataElement.dataElement"></file-select>
+                        <file-select ng-model="event.dataValues[getDataElementIndex(programStageDataElement.dataElement)]" event="event" dhis-data-element="programStageDataElement.dataElement"></file-select>
                     </div>
                     <element-input ng-program-stage-data-element="programStageDataElement"
                                    ng-model="event.dataValues[getDataElementIndex(programStageDataElement.dataElement)]"></element-input>
