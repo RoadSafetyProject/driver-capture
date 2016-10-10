@@ -324,6 +324,9 @@ var appDirectives = angular.module('appDirectives', [])
                     });
                     modalInstance.result.then(function (photo) {
                         $scope.imageSrc = photo;
+                        iRoadModal.uploadFile($scope.file).then(function(response){
+                            $scope.ngModel.value = response.response.fileResource.id;
+                        })
                     }, function () {
                     });
                 }
